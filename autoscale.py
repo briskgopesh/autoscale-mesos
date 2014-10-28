@@ -82,3 +82,71 @@ class AwsAsgScaler():
         if new_count != current_count:
             logger.info("Scaling to %s", new_count)
             c.set_desired_capacity(self.asg_name, new_count)
+
+class AwsAsgScaler():
+    def __init__(self, region, asg_name, min_instances=1, max_instances=None,
+                 aws_access_key_id=None, aws_secret_access_key=None):
+        self.region = region
+        self.asg_name = asg_name
+        self.min_instances = min_instances
+        self.max_instances = max_instances
+        self.aws_access_key_id = aws_access_key_id
+        self.aws_secret_access_key = aws_secret_access_key
+
+    def _get_connection(self):
+        if self.aws_access_key_id and self.aws_secret_access_key:
+            return boto.ec2.autoscale.connect_to_region(
+                self.region,
+                aws_access_key_id=self.aws_access_key_id,
+                aws_secret_access_key=self.aws_secret_access_key)
+        else:
+            return boto.ec2.autoscale.connect_to_region(self.region)
+
+    def scale(self, delta):
+        c = self._get_connection()
+        current_count = c.get_all_groups(names=[self.asg_name])[0].desired_capacity
+        logger.info("Current scale: %s", current_count)
+        new_count = current_count + delta
+
+        if self.min_instances and new_count < self.min_instances:
+            new_count = self.min_instances
+        elif self.max_instances and new_count > self.max_instances:
+            new_count = self.max_instances
+
+        if new_count != current_count:
+            logger.info("Scaling to %s", new_count)
+            c.set_desired_capacity(self.asg_name, new_count)
+
+class OpenStackScaler():
+    def __init__(self, region, asg_name, min_instances=1, max_instances=None,
+                 aws_access_key_id=None, aws_secret_access_key=None):
+        self.region = region
+        self.asg_name = asg_name
+        self.min_instances = min_instances
+        self.max_instances = max_instances
+        self.aws_access_key_id = aws_access_key_id
+        self.aws_secret_access_key = aws_secret_access_key
+
+    def _get_connection(self):
+        if self.aws_access_key_id and self.aws_secret_access_key:
+            return boto.ec2.autoscale.connect_to_region(
+                self.region,
+                aws_access_key_id=self.aws_access_key_id,
+                aws_secret_access_key=self.aws_secret_access_key)
+        else:
+            return boto.ec2.autoscale.connect_to_region(self.region)
+
+    def scale(self, delta):
+        c = self._get_connection()
+        current_count = c.get_all_groups(names=[self.asg_name])[0].desired_capacity
+        logger.info("Current scale: %s", current_count)
+        new_count = current_count + delta
+
+        if self.min_instances and new_count < self.min_instances:
+            new_count = self.min_instances
+        elif self.max_instances and new_count > self.max_instances:
+            new_count = self.max_instances
+
+        if new_count != current_count:
+            logger.info("Scaling to %s", new_count)
+            c.set_desired_capacity(self.asg_name, new_count)
